@@ -1,10 +1,19 @@
-with open('allele_frac_tsv.txt', 'r') as infile:
+import argparse
+parser = argparse.ArgumentParser()
+parser.add_argument("infile", help="File of shared allele fractions")
+parser.add_argument("outfile", help="File with comparison categories")
+args = parser.parse_args()
+
+
+with open(args.infile, 'r') as infile:
     lines = infile.readlines()
 
 newlines = []
 for line in lines:
     linelist = line.rstrip().split('\t')    
-    if linelist[0] == 'Sample1':
+    if line[0] == '#':
+        continue
+    elif linelist[0] == 'Sample1':
         line = line.rstrip() + '\tCategory\n'
     else:        
         for i in range(2):
@@ -42,7 +51,7 @@ for line in lines:
                 linelist.append('unrel.mom.o.babies')
         line = '\t'.join(linelist) + '\n'
     newlines.append(line)
-with open('allele_frac_wcats_tsv.txt', 'w') as outfile:
+with open(args.outfile, 'w') as outfile:
     outfile.writelines(newlines)
 
         
