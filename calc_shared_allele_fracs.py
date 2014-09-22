@@ -1,14 +1,8 @@
 """calc_shared_allele_fracs.py - A script to parse .vcf files and calculate the
 shared allele fraction as in Schloissnig et al. Cliff Beall 9/9/14"""
-
+import argparse
 import random
-import time
-print time.strftime("Start: %I:%M", time.localtime())
-filename = '/Volumes/GriffenLeysLab/Cliff/illumina_strains/mosaik_others/Prev_mel_25845_all.vcf'
-samp_level = 10
-totals = [0,0,0,0] #[total sites, total alleles, snps, complex]
-allele_dict = {}
-random.seed(0)
+
 
 def down_sample(varlist, level):
     refnum = int(varlist[2])
@@ -17,8 +11,18 @@ def down_sample(varlist, level):
     for i in range(1, len(altnums) + 1):
         sample_source += [i] * altnums[i - 1]
     return random.sample(sample_source, level)
-        
 
+parser = argparse.ArgumentParser()
+parser.add_argument("infile", help=".vcf file to process")
+parser.add_argument("-s", "--sampling", type=int, help="Downsampling level", default=10)
+
+args = parser.parse_args()
+
+filename = args.infile
+samp_level = args.sampling
+totals = [0,0,0,0] #[total sites, total alleles, snps, complex]
+allele_dict = {}
+random.seed(0)
 
 with open(filename, 'r') as vcffile:
     for line in vcffile:
@@ -65,9 +69,9 @@ with open(filename, 'r') as vcffile:
                 for j in range(i, len(samples)):
                     allele_dict[(samples[i], samples[j])] = [0,0] # [total alleles, shared]
                     
-print 'Input file: ' + filename
-print 'Sampling depth: ' + str(samp_level)
-print 'There were %s sites with %s alleles. %s were SNPs and %s were complex variants' % tuple(totals)
+print '#Input file: ' + filename
+print '#Sampling depth: ' + str(samp_level)
+print '#There were %s sites with %s alleles. %s were SNPs and %s were complex variants' % tuple(totals)
 print 'Sample1\tSample2\tTot_alleles\tShared_alleles\tShared_fraction'
 for k in allele_dict:
     if allele_dict[k][0] != 0:
@@ -75,4 +79,4 @@ for k in allele_dict:
         print '\t'.join([k[0], k[1], str(allele_dict[k][0]), str(allele_dict[k][1]), str(fraction)])
     else:
         print '\t'.join([k[0], k[1], str(allele_dict[k][0]), str(allele_dict[k][1]), "undefined"])
-print time.strftime("End: %I:%M", time.localtime())
+
