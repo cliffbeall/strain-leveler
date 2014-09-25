@@ -22,7 +22,7 @@ filename = args.infile
 samp_level = args.sampling
 totals = [0,0,0,0] #[total sites, total alleles, snps, complex]
 allele_dict = {}
-random.seed(0)
+random.seed()
 
 with open(filename, 'r') as vcffile:
     for line in vcffile:
