@@ -35,11 +35,14 @@ with open(filename, 'r') as vcffile:
                 varlist_i = sublist[i].split(':')
                 allele_counts_i = [float(varlist_i[2])] + [float(x) for x in varlist_i[4].split(',')]
                 s_aci = sum(allele_counts_i)
+                if s_aci == 0.0:
+                    continue
                 for k in range(len(allele_counts_i)):
                     countik = allele_counts_i[k]
                     remaining = allele_counts_i[:k] + allele_counts_i[k+1:]
                     for count2 in remaining:
-                        pi_by_samp[samples[i]] += (countik/s_aci)*((count2)/(s_aci - 1))
+                        if s_aci > 1:
+                            pi_by_samp[samples[i]] += (countik/s_aci)*((count2)/(s_aci - 1))
                 if i == len(sublist) - 1:
                     break
                 for j in range(i + 1, len(sublist)):
@@ -48,6 +51,8 @@ with open(filename, 'r') as vcffile:
                     varlist_j = sublist[j].split(':')
                     allele_counts_j = [float(varlist_j[2])] + [float(x) for x in varlist_j[4].split(',')]
                     s_acj = sum(allele_counts_j)
+                    if s_acj == 0.0:
+                        continue
                     for k in range(len(allele_counts_i)):
                         j_sublist = allele_counts_j[:k] + allele_counts_j[k+1:]
                         for countj in j_sublist:
@@ -67,9 +72,9 @@ with open(filename, 'r') as vcffile:
                 for j in range(i + 1, len(samples)):
                     pi_between[(samples[i], samples[j])] = 0.0 
 
-##with open(reffile, 'r') as handle:
-##    reflen = sum([len(rec) for rec in SeqIO.parse(handle, 'fasta')])
-reflen = 42
+with open(reffile, 'r') as handle:
+    reflen = sum([len(rec) for rec in SeqIO.parse(handle, 'fasta')])
+##reflen = 42
 
 print "# Analyzed vcf file: " + filename
 print "# Reference genome: " + reffile
