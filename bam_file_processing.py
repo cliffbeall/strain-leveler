@@ -58,15 +58,15 @@ for folder in subfolders:
     		subprocess.call(rgcommand + ['INPUT=' + f2, 'OUTPUT=' + sub2] + rginfo)
     		sub12 = bamdir + prefix + folder + '_combined.bam'
     		mcommand = '/Users/cliffbeall/samtools-1.0/samtools merge -c -p ' + \
-    		           ' '.join(sub12, sub1, sub2)
+    		           ' '.join([sub12, sub1, sub2])
     		subprocess.call(mcommand, shell=True)
     		mergelist.remove(f1)
     		mergelist.remove(f2)
     		mergelist.append(sub12)
     mergedbam = "%sproc_bams/%s_merged.bam" % (mosdir, folder)
-    command3 = "~/samtools-0.1.16/samtools merge " + mergedbam + " " + ' '.join(mergelist)
+    command3 = "~/samtools-1.0/samtools merge " + mergedbam + " " + ' '.join(mergelist)
     subprocess.call(command3, shell=True)
-    command4 = "~/samtools-0.1.16/samtools index " + mergedbam
+    command4 = "~/samtools-1.0/samtools index " + mergedbam
     subprocess.call(command4, shell=True)
 
                      
