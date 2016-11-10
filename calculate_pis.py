@@ -78,12 +78,13 @@ with open(reffile, 'r') as handle:
 
 print "# Analyzed vcf file: " + filename
 print "# Reference genome: " + reffile
+print "# Reference genome length: " + str(reflen)
 print "# Pi within samples:"
 print "Sample\tPi"
 print "All\t" + str(pi_sum / reflen)
-for samp in pi_by_samp:
+for samp in sorted(pi_by_samp):
     print samp + "\t" + str(pi_by_samp[samp] / reflen)
 print "# Pi between samples:"
 print "Sample1\tSample2\tPi"
 for (samp1, samp2) in pi_between:
-    print "\t".join([samp1, samp2, str(pi_between[(samp1, samp2)] / reflen)])
+    print "\t".join(sorted([samp1, samp2]) + [str(pi_between[(samp1, samp2)] / reflen)])

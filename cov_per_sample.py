@@ -1,24 +1,39 @@
+"""cov_per_sample.py - uses samtools depth and awk to calculate average coverage per sample
+It assumes alignments that have been processed with the bam_file_processing script
+stored in a proc_bams folder within parent_folder. It gets a list of species abbreviations
+to calculate for from a file designated by the species_file argument
+"""
+import argparse
 import subprocess
 import os
 
-os.chdir('/Volumes/GriffenLeysLab/Cliff/illumina_strains/mosaik_others/')
+parser = argparse.ArgumentParser()
+parser.add_argument("parent_folder", help="parent folder with subfolders containing alignments")
+parser.add_argument("species_file", help="species abbreviations to calculate")
+args = parser.parse_args()
 
-files = {}
+os.chdir(args.parent_folder)
 
-with open('samples_filenames.txt', 'r') as infile:
+prefixes = {}
+
+with open('/Volumes/GriffenLeysLab/Cliff/illumina_strains/fileprefix_samples.txt', 'r') as infile:
     for line in infile:
         linelist = line.rstrip().split('\t')
-        files[linelist[3]] = linelist[:3]
-samples = files.keys()
+        prefixes[linelist[1]] = linelist[0]
+samples = prefixes.keys()
+
+species = []
+with open(args.species_file, 'r') as infile2:
+    for line in infile2:
+        species.append(line.rstrip())
 
 with open('cov_per_sample_tsv.txt', 'w') as outfile:
-    outfile.write('Sample\tCov_Veill_parv_2008\tCov_Prev_mel_25845\tCov_Ro_mu_43093\n')
+    outfile.write('Sample\t' + '\t'.join(species) + '\n')
     for sample in samples:
         outfile.write(sample)
-        for name in files[sample]:
-            command = "~/samtools-0.1.16/samtools depth %s | awk 'BEGIN { COV = 0; LEN = 0 } { COV += $3; LEN++ } END { print COV / LEN }'" % ('./proc_bams/' + name)
+        for spec in species:
+            path = args.parent_folder + 'proc_bams/' + prefixes[sample] + spec +  '_sorted.bam'
+            command = "~/samtools-0.1.16/samtools depth %s | awk 'BEGIN { COV = 0; LEN = 0 } { COV += $3; LEN++ } END { print COV / LEN }'" % (path)
             o = subprocess.check_output(command, shell=True)
             outfile.write('\t' + o.rstrip())
         outfile.write('\n')
-        
-    
