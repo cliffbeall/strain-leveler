@@ -1,8 +1,15 @@
-import argparse
+"""calculate_pis.py: Takes a vcf file created by the freebayes program and calculates 
+nucleotide diversity within and between samples. Altered 1/17/2018 to reflect change in
+the vcf format output from freebayes 1.1.0 versus 0.9.14
+"""
+
+import argparse, os
 from Bio import SeqIO
 
 parser = argparse.ArgumentParser()
+parser.add_argument("-r", help = 'More R compatible output', action="store_true")
 parser.add_argument("infile", help=".vcf file to process")
+
 
 args = parser.parse_args()
 filename = args.infile
@@ -33,7 +40,7 @@ with open(filename, 'r') as vcffile:
                 if sublist[i] == '.':
                     continue
                 varlist_i = sublist[i].split(':')
-                allele_counts_i = [float(varlist_i[2])] + [float(x) for x in varlist_i[4].split(',')]
+                allele_counts_i = [float(varlist_i[3])] + [float(x) for x in varlist_i[5].split(',')]
                 s_aci = sum(allele_counts_i)
                 if s_aci == 0.0:
                     continue
@@ -49,7 +56,7 @@ with open(filename, 'r') as vcffile:
                     if sublist[j] == '.':
                         continue
                     varlist_j = sublist[j].split(':')
-                    allele_counts_j = [float(varlist_j[2])] + [float(x) for x in varlist_j[4].split(',')]
+                    allele_counts_j = [float(varlist_j[3])] + [float(x) for x in varlist_j[5].split(',')]
                     s_acj = sum(allele_counts_j)
                     if s_acj == 0.0:
                         continue
@@ -76,15 +83,36 @@ with open(reffile, 'r') as handle:
     reflen = sum([len(rec) for rec in SeqIO.parse(handle, 'fasta')])
 ##reflen = 42
 
-print "# Analyzed vcf file: " + filename
-print "# Reference genome: " + reffile
-print "# Reference genome length: " + str(reflen)
-print "# Pi within samples:"
-print "Sample\tPi"
-print "All\t" + str(pi_sum / reflen)
-for samp in sorted(pi_by_samp):
-    print samp + "\t" + str(pi_by_samp[samp] / reflen)
-print "# Pi between samples:"
-print "Sample1\tSample2\tPi"
-for (samp1, samp2) in pi_between:
-    print "\t".join(sorted([samp1, samp2]) + [str(pi_between[(samp1, samp2)] / reflen)])
+if not args.r:
+    print "# Analyzed vcf file: " + filename
+    print "# Reference genome: " + reffile
+    print "# Reference genome length: " + str(reflen)
+    print "# Pi within samples:"
+    print "Sample\tPi"
+    print "All\t" + str(pi_sum / reflen)
+    for samp in sorted(pi_by_samp):
+        print samp + "\t" + str(pi_by_samp[samp] / reflen)
+    print "# Pi between samples:"
+    print "Sample1\tSample2\tPi"
+    for (samp1, samp2) in pi_between:
+        print "\t".join(sorted([samp1, samp2]) + [str(pi_between[(samp1, samp2)] / reflen)])
+else:
+    refname = os.path.basename(filename)[:-4]
+    if refname.startswith('oral-phage'):
+        type = 'phage'
+    else:
+        type = 'bacterial'
+    for samp in sorted(pi_by_samp):
+        cat = 'same_sample'
+        if not samp.endswith(refname):
+            print '\t'.join(['within', refname, type, cat, samp + refname, samp + refname, str(pi_by_samp[samp] / reflen)])
+        else:
+            print '\t'.join(['within', refname, type, cat, samp, samp, str(pi_by_samp[samp] / reflen)])
+    for (samp1, samp2) in pi_between:
+        if samp1[3:8] == samp2[3:8]:
+            cat = 'same_person'
+        elif samp1[3:5] == samp2[3:5]:
+            cat = 'same_family'
+        else:
+            cat = 'different'
+        print '\t'.join(['between', refname, type, cat, samp1, samp2, str(pi_between[(samp1, samp2)] / reflen)])

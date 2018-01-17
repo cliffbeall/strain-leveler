@@ -1,7 +1,7 @@
 ##fileformat=VCFv4.1
 ##fileDate=20140908
 ##source=freeBayes v0.9.14-30-g6ac638c
-##reference=/Users/cliffbeall/illumina_strains/mitis_group/Streptococcus_mitis_B6_uid46097/NC_013853.fna
+##reference=/Volumes/GriffenLeysLab/Cliff/Home_folder_from_macpro/illumina_strains/mitis_group/Streptococcus_mitis_B6_uid46097/NC_013853.fna
 ##phasing=none
 ##commandline="/Users/cliffbeall/freebayes/bin/freebayes -f /Users/cliffbeall/illumina_strains/mitis_group/Streptococcus_mitis_B6_uid46097/NC_013853.fna -F 0.01 -C 4 -K --haplotype-length 0 /Volumes/GriffenLeysLab/Cliff/mitis_mosaik/tmp_bams/mitisB6_merged_fixed.bam"
 ##INFO=<ID=NS,Number=1,Type=Integer,Description="Number of samples with data">

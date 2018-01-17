@@ -36,9 +36,9 @@ for folder in subfolders:
             subprocess.call(command2, shell=True)
             mergelist.append(prefix3 + '.bam')
     if args.merge:
-    	rgcommand = ['java', '-jar', '-Xmx4g', \
+        rgcommand = ['java', '-jar', '-Xmx4g', \
                      '/Users/cliffbeall/picard-tools-1.112/picard-tools-1.112/AddOrReplaceReadGroups.jar']
-    	rginfo1 = ['RGID=MERGE1', 'RGLB=CB0001/21', 'RGSM=AB.BS.10', \
+        rginfo1 = ['RGID=MERGE1', 'RGLB=CB0001/21', 'RGSM=AB.BS.10', \
                   'RGPL=illumina', 'RGPI=170', 'RGPU=ATCACG/GTTTCG', \
                   'VALIDATION_STRINGENCY=SILENT']
         rginfo2 = ['RGID=MERGE2', 'RGLB=CB0002/16', 'RGSM=AB.BS.3', \
@@ -49,24 +49,22 @@ for folder in subfolders:
                   'VALIDATION_STRINGENCY=SILENT']
         rginfos = [rginfo1, rginfo2, rginfo3]
         prefixes = ['AB_BS_10_', 'AB_BS_3_', 'AA_MS_10_']
-    	files1 = [f for f in mergelist if ('CB0001' in f or 'CB0002' in f or 'CB0003' in f)]
-    	files2 = [f for f in reversed(mergelist) if (('CB0014' in f or 'CB0016' in f or 'CB0021' in f))]
-    	for (f1, f2, rginfo, prefix) in zip(files1, files2, rginfos, prefixes):
-    		sub1 = bamdir + prefix + folder + 'part1.bam'
-    		subprocess.call(rgcommand + ['INPUT=' + f1, 'OUTPUT=' + sub1] + rginfo)
-    		sub2 = bamdir + prefix + folder + 'part2.bam'
-    		subprocess.call(rgcommand + ['INPUT=' + f2, 'OUTPUT=' + sub2] + rginfo)
-    		sub12 = bamdir + prefix + folder + '_combined.bam'
-    		mcommand = '/Users/cliffbeall/samtools-1.0/samtools merge -c -p ' + \
-    		           ' '.join([sub12, sub1, sub2])
-    		subprocess.call(mcommand, shell=True)
-    		mergelist.remove(f1)
-    		mergelist.remove(f2)
-    		mergelist.append(sub12)
+        files1 = [f for f in mergelist if ('CB0001' in f or 'CB0002' in f or 'CB0003' in f)]
+        files2 = [f for f in reversed(mergelist) if (('CB0014' in f or 'CB0016' in f or 'CB0021' in f))]
+        for (f1, f2, rginfo, prefix) in zip(files1, files2, rginfos, prefixes):
+            sub1 = bamdir + prefix + folder + 'part1.bam'
+            subprocess.call(rgcommand + ['INPUT=' + f1, 'OUTPUT=' + sub1] + rginfo)
+            sub2 = bamdir + prefix + folder + 'part2.bam'
+            subprocess.call(rgcommand + ['INPUT=' + f2, 'OUTPUT=' + sub2] + rginfo)
+            sub12 = bamdir + prefix + folder + '_combined.bam'
+            mcommand = '/Users/cliffbeall/samtools-1.0/samtools merge -c -p ' + \
+                       ' '.join([sub12, sub1, sub2])
+            subprocess.call(mcommand, shell=True)
+            mergelist.remove(f1)
+            mergelist.remove(f2)
+            mergelist.append(sub12)
     mergedbam = "%sproc_bams/%s_merged.bam" % (mosdir, folder)
     command3 = "~/samtools-1.0/samtools merge " + mergedbam + " " + ' '.join(mergelist)
     subprocess.call(command3, shell=True)
     command4 = "~/samtools-1.0/samtools index " + mergedbam
     subprocess.call(command4, shell=True)
-
-                     
